@@ -1,0 +1,58 @@
+set terminal png size ${width},${height} font "${font}"
+set output "${result}"
+
+set title "${title}"
+filename='${data}'
+
+rowi = 0
+rowf = 100
+
+# obtain sum(column(2)) from rows `rowi` to `rowf`
+set datafile separator '|'
+stats filename u 2 every ::rowi::rowf noout prefix "A"
+
+# rowf should not be greater than length of file
+rowf = (rowf-rowi > A_records - 1 ? A_records + rowi - 1 : rowf)
+
+angle(x)=x*360/A_sum
+#percentage(x)=x*100/A_sum
+
+# circumference dimensions for pie-chart
+centerX=0
+centerY=0
+radius=1
+
+# label positions
+yposmin = 0.0
+yposmax = 0.95*radius
+xpos = 1.5*radius
+#ypos(i) = yposmax - i*(yposmax-yposmin)/(1.0*rowf-rowi)
+ypos(i) = yposmax - i*0.20*radius
+
+#-------------------------------------------------------------------
+# now we can configure the canvas
+set style fill solid 1     # filled pie-chart
+unset key                  # no automatic labels
+unset tics                 # remove tics
+unset border               # remove borders; if some label is missing, comment to see what is happening
+
+#set title "${title}"
+
+set size ratio -1              # equal scale length
+set xrange [-radius:3*radius]  # [-1:2] leaves space for labels
+set yrange [-radius:radius]    # [-1:1]
+
+#-------------------------------------------------------------------
+pos = 0             # init angle
+colour = 0          # init colour
+#set style line 1 lt 2 lw 2 pt 3 ps 0.5 lc 0xffffff
+
+#set object 1 circle at screen 0.30,0.5 size screen 0.14 fillcolor rgb "white" front
+set style fill solid 1.0 border rgb 'white'
+# 1st line: plot pie-chart
+# 2nd line: draw colored boxes at (xpos):(ypos)
+# 3rd line: place labels at (xpos+offset):(ypos)
+plot filename u (centerX):(centerY):(radius):(pos):(pos=pos+angle($2)):(colour=$3) every ::rowi::rowf w circle lc rgb var lw 5,\
+     filename u (centerX):(centerY):(radius*0.5):(pos):(pos=pos+angle($2)):(colour=0xffffff) every ::rowi::rowf w circle lc rgb var lw 5,\
+     for [i=0:rowf-rowi] filename u (xpos):(ypos(i)):(colour=$3) every ::i+rowi::i+rowi w p pt 5 ps 4 lc rgb var,\
+     for [i=0:rowf-rowi] filename u (xpos):(ypos(i)):(sprintf('%d %s', $2, stringcolumn(1))) every ::i+rowi::i+rowi w labels left offset 3,0

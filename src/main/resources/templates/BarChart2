@@ -1,0 +1,19 @@
+set terminal png size ${width},${height} font "${font}"
+set output "${result}"
+set datafile separator '|'
+set title "${title}"
+
+set nokey
+
+set boxwidth 0.8
+set style fill solid
+
+#set xrange [-0.6:2.6]
+set xrange [${x_range}]
+set xtics nomirror
+
+set yrange [0:*]
+set grid y
+set ylabel "${y_label}"
+
+plot "${data}" using 0:2:3:xtic(1) with boxes lc rgb var fillstyle pattern 3

@@ -1,0 +1,39 @@
+plugins {
+    id 'org.springframework.boot' version '2.1.5.RELEASE'
+    id 'java'
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+group = 'si.ib'
+version = '1.0.0'
+sourceCompatibility = '1.8'
+
+ext.mainClass = "si.ib.report.SrvApplication"
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    compile group: 'commons-codec', name: 'commons-codec', version: '1.12'
+    compile group: 'guru.nidi', name: 'graphviz-java', version: '0.8.8'
+    compile group: 'fr.opensagres.xdocreport', name: 'fr.opensagres.xdocreport.template.freemarker', version: '2.0.2'
+    compile group: 'fr.opensagres.xdocreport', name: 'fr.opensagres.xdocreport.document.docx', version: '2.0.2'
+    compile group: 'fr.opensagres.xdocreport', name: 'fr.opensagres.xdocreport.document', version: '2.0.2'
+    compile group: 'org.apache.commons', name: 'commons-exec', version: '1.3'
+}
+
+task copyToDockerDir1(type:Copy){
+    from "$projectDir/build/libs"
+    include "report-1.0.0.jar"
+    into "$projectDir/docker"
+}
+task copyToDockerDir2(type:Copy){
+    from "$projectDir/templates"
+    into "$projectDir/docker/templates"
+}
+
+jar.finalizedBy copyToDockerDir1,copyToDockerDir2

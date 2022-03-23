@@ -1,0 +1,22 @@
+set terminal png size ${width},${height} font "${font}"
+set output "${result}"
+set datafile separator '|'
+set size 1,0.9
+set nokey
+set bmargin 3
+set boxwidth 0.8
+set style fill solid
+set title "${title}"
+
+set xrange [${x_range}]
+set xtics nomirror
+
+unset ytics
+unset grid
+set border 0 linecolor "white"
+set xtics  textcolor "black"
+
+plot "${data}" using 0:2:3:xtic(1) with boxes lc rgb var fillstyle pattern 3,\
+     "${data}" using 0:($2+0.0):2 with labels offset 0,1, \
+     "${data}" using 0:($2+1):("") with labels, \
+     "${data}" using 0:(0.00001):3:xtic(1) with boxes lc rgb var fillstyle pattern 3
